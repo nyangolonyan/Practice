@@ -1,0 +1,198 @@
+#include <iostream>
+#include <iomanip>
+#include <time.h>
+#include <windows.h>
+
+#define ALARMS 10
+#define HOURS 11
+#define MINUTES 10
+
+using namespace std;
+
+bool GT (int* L, int* R)
+{
+    if (L[0] > R[0]) return true;
+    return false;
+}
+class Time1
+{
+protected:
+    int hour;
+    int minute;
+    int second;
+public:
+    Time1();
+    ~Time1();
+    int get_hour();
+    int get_minute();
+    int get_second();
+    void set_time (int, int, int);
+    friend int ext_hour (const Time1 &);
+};
+Time1:: Time1()
+{
+    hour = 0;
+    minute = 0;
+    second = 0;
+    cout << "It's a new object of Time1 at address " << this << endl;
+}
+Time1::~Time1()
+{
+   cout << "Destructor of Time1 object at address " << this << endl;
+}
+int Time1::get_hour()
+{
+    return hour;
+}
+int Time1::get_minute()
+{
+    return minute;
+}
+int Time1::get_second()
+{
+    return second;
+}
+void Time1::set_time (int H, int M, int S)
+{
+    hour=H;
+    minute=M;
+    second=S;
+    if (minute>59) minute=59;
+    if (minute<0) minute=0;
+    if (second>59) second=59;
+    if (second<0) second=0;
+}
+class Alarm: public Time1
+{
+    int **Alarms;
+    int On_Off;
+    int *Current;
+public:
+    Alarm();
+    ~Alarm();
+    void On();
+    void Off();
+    void Next ();
+    void prnAlarmTimes ();
+    Alarm& operator++ (int);
+    int& operator [] (int);
+    friend bool GT (int*, int*);
+
+};
+Alarm::Alarm():Time1()
+{
+    int i;
+    On_Off=0;
+    Alarms = new int* [ALARMS];
+    for (i=0; i<ALARMS; i++)
+    {
+        Alarms[i]=new int [3];
+        Alarms[i][0]=(HOURS-i)%24;
+        Alarms[i][1] = Alarms [i][2]=MINUTES%60;
+
+    }
+    Current=Alarms[0];
+}
+Alarm::~Alarm()
+{
+    int i;
+    for (i=0; i<ALARMS; i++)
+        delete [] Alarms[i];
+    delete [] Alarms;
+}
+void Alarm::On()
+{
+    On_Off=1;
+    cout<<"Alarm is On" << endl;
+    return;
+}
+void Alarm::Off()
+{
+    On_Off=0;
+    cout<<"Alarm is off" << endl;
+    return;
+}
+void Alarm::Next()
+{
+    int* Temp =Alarms [0];
+    for (int i=0; i<ALARMS; i++)
+    {
+        if(GT(Current, Temp))
+        {
+            if(GT(Alarms[i],Current)||GT(Temp,Alarms[i]))
+                Temp=Alarms[i];
+        }
+        else
+        {
+            if (GT(Alarms[i],Current)&&GT(Temp,Alarms[i]))
+                Temp=Alarms[i];
+        }
+    }
+    Current=Temp;
+    cout<<"Current alarm time is:" <<
+           Current[0]<< ":" <<
+           Current[1]<< ":" <<
+           Current[2] << endl;
+}
+void Alarm::prnAlarmTimes()
+{
+    for(int i=0; i<ALARMS; i++)
+    cout<<"Alarm Time [" << i <<"] = "<< Alarms[i][0]<< ":" << Alarms [i][1]<< ":"<< Alarms [i][2]<< endl;
+}
+Alarm& Alarm::operator++ (int)
+{
+    Next();
+    return (*this);
+}
+int ext_hour (const Time1 &T)
+{
+    return T.hour;
+}
+int& Alarm::operator[] (int Index)
+{
+    int Aux[3];
+    int& Temp=Index;
+    for (int i=0; i<ALARMS-1; i++)
+        for (int j=i+1; j<ALARMS; j++)
+        {
+            if(GT(Alarms[i],Alarms[j]))
+            {
+                for(int k=0; k<3; k++)
+                {
+                    Aux[k]=Alarms[j][k];
+                    Alarms[j][k]=Alarms[i][k];
+                    Alarms[i][k]=Aux[k];
+                }
+            }
+        }
+    return Temp;
+}
+int main()
+{
+    int H,M,S;
+    
+    Time1 T1, T2;
+
+    struct tm *temp;
+    time_t sysTime = time(NULL);
+    temp = localtime(&sysTime);
+    cout << "Local time is :" << temp->tm_hour << ":" << temp->tm_min << ":" <<temp->tm_sec << endl;
+    T1.set_time(temp->tm_hour, temp->tm_min, temp->tm_sec);
+
+    T2 = T1;
+    cout << "T1 time is :" << T1.get_hour() << ":"
+                           << T1.get_minute() << ":"
+                           << T1.get_second() << endl;
+    cout << "Time extraction: Hour = " << ext_hour (T2) << endl;
+    Alarm A1;
+    A1.On();
+    A1.Next();
+    A1.Off();
+    A1++;
+    A1++;
+    A1.prnAlarmTimes();
+    A1[1];
+    A1.prnAlarmTimes();
+
+    return 0;
+}
