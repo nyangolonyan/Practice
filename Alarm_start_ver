@@ -1,0 +1,101 @@
+#include <iostream>
+#include <time.h>
+#include <math.h>
+#include <windows.h>
+#include <iomanip>
+
+using namespace std;
+
+class Time1;
+
+class Date_Time
+{
+    Time1 *t;
+public:
+    Date_Time(Time1 &);
+    int get_hour();
+    int get_minute();
+};
+class Time1
+{
+    int hour;
+    int minute;
+    int second;
+public:
+    Time1();
+    ~Time1();
+    int get_hour ();
+    int get_minute ();
+    int get_second ();
+    void set_time (int, int, int);
+    friend int ext_hour (const Time1&);
+    friend int Date_Time::get_hour();
+};
+Time1::Time1()
+{
+    hour=0;
+    minute=0;
+    second=0;
+    cout << "It is a new object of Time1 address" << this << endl;
+}
+Time1::~Time1()
+{
+    cout << "Destructor of Time1 object at address" << this << endl;
+}
+int Time1::get_hour()
+{
+    return hour;
+}
+int Time1::get_minute()
+{
+    return minute;
+}
+int Time1::get_second()
+{
+    return second;
+}
+void Time1::set_time(int H, int M, int S)
+{
+    hour=H;
+    minute=M;
+    second=S;
+    if (minute>59) minute=59;
+    if (minute<0) minute=0;
+    if (second>59) second=59;
+    if (second<0) second=0;
+}
+Date_Time::Date_Time(Time1 &T)
+{
+    t=&T;
+    cout << "It is a new object of Date_Time address" << this << endl;
+}
+int Date_Time::get_hour()
+{
+    return t->hour;
+}
+int Date_Time::get_minute()
+{
+    return t->get_minute();
+}
+int ext_hour (const Time1 &T)
+{
+    return T.hour;
+}
+int main()
+{
+
+    Time1 T1, T2;
+    struct tm *temp;
+    time_t systime = time(NULL);
+    temp = localtime(&systime);
+    cout << "local time is :" << temp->tm_hour << ":" << temp->tm_min << ":"<< temp->tm_sec << endl;
+    T1.set_time(temp->tm_hour, temp->tm_min, temp->tm_sec);
+    T2=T1;
+    cout << "T2 time is :" <<T2.get_hour()<<":"<<T2.get_minute()<<":"<<T2.get_second()<<endl;
+    cout << "Time extraction: Hour = "<<ext_hour(T2)<<endl;
+    Date_Time DT(T2);
+    cout.fill('0');
+    cout << "Time in Date_Time: Hour: Minute =" << setw(2) << DT.get_hour()<< ":"<<setw(2)<<DT.get_minute()<<endl;
+    return 0;
+
+}
