@@ -1,0 +1,128 @@
+#include <iostream>
+#include <time.h>
+#include <math.h>
+#include <windows.h>
+#include <iomanip>
+
+using namespace std;
+
+class Time1
+{
+    int hour;
+    int minute;
+    int second;
+public:
+    //Time1();
+    Time1(int, int, int);
+    ~Time1();
+    int get_hour ();
+    int get_minute ();
+    int get_second ();
+    void set_time (int, int, int);
+    void set_time (int, int);
+    void set_time();
+};
+Time1::Time1(int H=23, int M=59, int S=59)
+{
+    hour=H;
+    minute=M;
+    second=S;
+    if (hour>23) hour=23;
+    if (hour<0) hour=0;
+    if (minute>59) minute=59;
+    if (minute<0) minute=0;
+    if (second>59) second=59;
+    if (second<0) second=0;
+    cout << "It is a second constructor Time1. A new object address" << this << endl;
+}
+Time1::~Time1()
+{
+    cout << "Destructor of Time1 object at address" << this << endl;
+}
+int Time1::get_hour()
+{
+    return hour;
+}
+int Time1::get_minute()
+{
+    return minute;
+}
+int Time1::get_second()
+{
+    return second;
+}
+void Time1::set_time(int H, int M, int S)
+{
+    hour=H;
+    minute=M;
+    second=S;
+    if (hour>23) hour=23;
+    if (hour<0) hour=0;
+    if (minute>59) minute=59;
+    if (minute<0) minute=0;
+    if (second>59) second=59;
+    if (second<0) second=0;
+}
+void Time1::set_time(int H, int M=0)
+{
+    hour=H;
+    minute=M;
+    if (hour>23) hour=23;
+    if (hour<0) hour=0;
+    if (minute>59) minute=59;
+    if (minute<0) minute=0;
+}
+void Time1::set_time()
+{
+    struct tm *temp;
+    time_t systime = time(NULL);
+    temp = localtime(&systime);
+    hour=(*temp).tm_hour;
+    minute= temp->tm_min;
+    second= temp->tm_sec;
+}
+int main()
+{
+    int H, M, S, Flag=0;
+
+    Time1 T1;
+    struct tm *temp;
+    time_t systime = time(NULL);
+    temp = localtime(&systime);
+    cout << "local time is :" << temp->tm_hour << ":" << temp->tm_min << ":"<< temp->tm_sec << endl;
+    T1.set_time(temp->tm_hour, temp->tm_min, temp->tm_sec);
+
+    Sleep(1000);
+    T1.set_time();
+    cout << "T1 time is :" <<T1.get_hour()<<":"<<T1.get_minute()<<":"<<T1.get_second()<<endl;
+    T1.set_time(22);
+    cout << "T1 time is :" <<T1.get_hour()<<":"<<T1.get_minute()<<":"<<T1.get_second()<<endl;
+    T1.set_time(21, 30);
+    cout << "T1 time is :" <<T1.get_hour()<<":"<<T1.get_minute()<<":"<<T1.get_second()<<endl;
+    T1.set_time(20, 30, 50);
+    cout << "T1 time is :" <<T1.get_hour()<<":"<<T1.get_minute()<<":"<<T1.get_second()<<endl;
+
+
+    cout << "Set the alarm time:" << endl;
+    cin >> H >> M >> S;
+    Time1 T2(H,M,S);
+    cout << "local time is :" << temp->tm_hour << ":" << temp->tm_min << ":"<< temp->tm_sec;
+    while (Flag==0)
+    {
+        systime = time(NULL);
+        temp = localtime(&systime);
+        T1.set_time(temp->tm_hour, temp->tm_min, temp->tm_sec);
+        cout <<"\b\b\b\b\b\b\b\b"<<setfill('0')<<setw(2)<< temp->tm_hour << ":" << setw(2) << temp->tm_min << ":"<< setw(2)<< temp->tm_sec;
+         if ((temp->tm_hour >= T2.get_hour())&&
+             (temp->tm_min >= T2.get_minute())&&
+             (temp->tm_sec >= T2.get_second())
+             )
+         {
+             Flag=1;
+             cout << "\7";
+         };
+         Sleep(1000);
+    }
+    cout << endl << "T2 time is:" << T2.get_hour() <<":"<< T2.get_minute() <<":"<< T2.get_second() << endl;
+    return 0;
+}
